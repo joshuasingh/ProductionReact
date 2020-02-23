@@ -17,6 +17,9 @@ import setAuthorizationHeader from "./components/AdminComponents/setAuthorizatio
 import io from "socket.io-client";
 
 class App extends React.Component {
+  
+  localMainData={}
+ 
   constructor(props) {
     super(props);
 
@@ -31,7 +34,7 @@ class App extends React.Component {
   setSocket() {
     console.log("in setup socket");
     if (this.state.socketConn === null) {
-      var connection = io.connect("http://localhost:8081/");
+      var connection = io.connect('http://localhost:4000/');
 
       this.props.InitiateSocketConnection(connection);
       this.setState({
@@ -49,13 +52,13 @@ class App extends React.Component {
 
   //fetch data from the serv
   fetchData = async () => {
-    await fetch(`http://localhost:8081/allData`)
+    await fetch(`http://localhost:4000/allData`)
       .then(response => response.json())
       .then(res => {
         console.log("received", res);
-        this.setState({
-          data1: res
-        });
+        // this.setState({
+        //   data1: res
+        // });
 
         //setting the initial value of all the received data
         this.props.initialize(res);
@@ -72,20 +75,13 @@ class App extends React.Component {
     this.fetchData();
     this.setSocket();
   
-    if (this.state.socketConn !== null) {
-
-      var  contextReference=this
-      this.state.socketConn.on("chat", function(data) {
-         console.log("message recevied from socket in app.js")
-       });
-     }
-
-
-
-  }
+   }
 
   render() {
     console.log("main index rendered again");
+    
+    this.props.mData.mainData!==[]?this.localMainData=this.props.mData.mainData:" "
+   
     return (
       <Router>
         <div className="App">
@@ -93,13 +89,13 @@ class App extends React.Component {
             <Switch>
               <Route
                 path="/"
-                component={() => <Homepage mainData={this.state.data1} />}
+                component={() => <Homepage mainData={this.localMainData} />}
                 exact
               />
               <Route
                 path="/details/:topic"
                 component={props => (
-                  <ElaborationPage mainData={this.state.data1} {...props} />
+                  <ElaborationPage mainData={this.localMainData} {...props} />
                 )}
                 exact
               />
@@ -111,7 +107,7 @@ class App extends React.Component {
                   //   fetchData={this.fetchData}
                   // />
                   <AdminLogin
-                    mainData={this.state.data1}
+                    mainData={this.localMainData}
                     fetchData={this.fetchData}
                   />
                 )}
@@ -121,7 +117,7 @@ class App extends React.Component {
                 path="/TestAdmin"
                 component={() => (
                   <AdminPage
-                    mainData={this.state.data1}
+                    mainData={this.localMainData}
                     fetchData={this.fetchData}
                   />
                 )}
@@ -152,13 +148,30 @@ class App extends React.Component {
         this.props.InitiateNavBar(item.links);
       }
     });
+ 
+     if (this.state.socketConn !== null) {
+     
+      var  contextReference=this
+       this.state.socketConn.on("chat", function(data) {
+        contextReference.props.updateInfo(data); 
+       });
+     }
+ 
+   
+ 
   }
+
+
+  
+
+
+
 }
 
 const mapStateToProps = state => {
   return {
-    user1: state.authReducer
-   // allData: state.AdminDetailView,
+    user1: state.authReducer,
+   mData: state.AdminDetailView,
   };
 };
 
@@ -174,6 +187,12 @@ const mapDispatchToProps = dispatch => {
       dispatch({
         type: "initial",
         payload: name1
+      });
+    },
+    updateInfo: name => {
+      dispatch({
+        type: "update",
+        payload: name
       });
     },
     InitiateNavBar: val => {

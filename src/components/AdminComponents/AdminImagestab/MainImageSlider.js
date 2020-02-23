@@ -52,7 +52,7 @@ class MainImageSlider extends React.Component {
   //fetch data from the server
   fetchDataMultiple = async datax => {
     await axios
-      .post("http://localhost:8081/mainImageslider/notSingle", datax)
+      .post("http://localhost:4000/mainImageslider/notSingle", datax)
       .then(
         res => {
           if (res.data.error === "tokenPro") {
@@ -131,7 +131,7 @@ class MainImageSlider extends React.Component {
 
       axios
         .post(
-          "http://localhost:8081/mainImages/removeUrlUpload",
+          "http://localhost:4000/mainImages/removeUrlUpload",
           data
         )
         .then(
@@ -228,7 +228,7 @@ class MainImageSlider extends React.Component {
   fetchDataSingle = async data1 => {
     console.log("called it");
 
-    axios.post("http://localhost:8081/mainImageslider/single", data1).then(
+    axios.post("http://localhost:4000/mainImageslider/single", data1).then(
       res => {
         try{
         if (res.data.error === "tokenPro") {
@@ -270,7 +270,7 @@ class MainImageSlider extends React.Component {
   uploadUrl = async urls => {
     console.log("uploading url called", this.mainPageSliderInfo_Id);
 
-    await fetch(`https://nh65v.sse.codesandbox.io/mainImages/urlUpload`, {
+    await fetch(`http://localhost:4000/mainImages/urlUpload`, {
       method: "POST",
       body: JSON.stringify({
         url: urls,
@@ -299,7 +299,7 @@ class MainImageSlider extends React.Component {
   //fetch data from image url
   //fetch data from the server
   fetchImageUrl = async () => {
-    await fetch(`https://nh65v.sse.codesandbox.io/getMainImageSliderUrl`)
+    await fetch(`http://localhost:4000/getMainImageSliderUrl`)
       .then(response => response.json())
       .then(res => {
         try {
